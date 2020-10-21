@@ -28,7 +28,7 @@ initPrompt = () => {
         'View Departments', 
         'View Roles', 
         'View Employees', 
-        'Update Employee', 
+        'Update Employee Role', 
         'QUIT'],
       message: 'What would you like to do?',
       name: 'userOptions'
@@ -52,11 +52,11 @@ initPrompt = () => {
       case 'View Employees':
         viewEmployees(); 
         break;
-      case 'Update Employee':
+      case 'Update Employee Role':
         updateEmployee(); 
         break;
-      default:
-        connection.end
+      case 'QUIT':
+        connection.end();
         break;
     }
   });
@@ -122,8 +122,28 @@ addRole = () => {
   });
 }
 
-selectRole = () => {
+let roles = [];
+// Getting array of roles
+getRoles = () => {
+  connection.query('SELECT * FROM role', function(err, res) {
+    if (err) throw err;
+    for(let i = 0; i < res.length; i++) {
+      roles.push(res[i].title);
+    }
+  })
+  return roles;
+}
 
+let managers = [];
+// Getting array of managers
+getManagers = () => {
+  connection.query('SELECT first_name, last_name FROM employee WHERE manager_id IS NULL', function(err, res) {
+    if (err) throw err;
+    for(let i = 0; i < res.length; i++) {
+      managers.push(res[i].first_name + ' ' + res[i].last_name);
+    }
+  })
+  return managers;
 }
 
 addEmployee = () => {
@@ -132,29 +152,29 @@ addEmployee = () => {
   .prompt([
     {
       type: 'input',
-      name: 'firstName',
+      name: 'first_name',
       message: 'Enter employee first name: '
     },
     {
       type: 'input',
-      name: 'lastName',
+      name: 'last_name',
       message: 'Enter employee last name: '
     },
     {
-      type: 'input',
-      name: 'role',
-      message: 'Enter employee last name: '
+      type: 'list',
+      name: 'role_id',
+      message: 'Choose role ID: ',
+      choices: [1, 2, 3]
     },
     {
       type: 'input',
-      name: 'managerName',
-      message: 'Who is their manager?'
+      name: 'manager_id',
+      message: 'Enter manager ID: ',
     }
   ]).then(function(res) {
-    let query = connection.query('INSERT INTO employees SET ?', res,
+    let query = connection.query('INSERT INTO employee SET ?', res,
     function(err, res) {
       if (err) throw err;
-      console.table(res);
       initPrompt();
     })
   })
@@ -176,25 +196,34 @@ viewRoles = () => {
   })
 }
 
-updateEmployee = () => {
-  connection.query('SELECT first_name, last_name, id FROM employees', function(err, res) {
+viewEmployees = () => {
+  connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name, CONCAT(e.first_name, ' ' ,e.last_name) AS Manager FROM employee INNER JOIN role on role.id = employee.role_id INNER JOIN department on department.id = role.department_id left join employee e on employee.manager_id = e.id", 
+  function(err, res) {
     if (err) throw err;
-    let employeeInfo = res.map(employee => ({name: employee.first_name + ' ' + employee.last_name, value: employee.id}))
+    console.table(res);
+    initPrompt();
+  })
+}
+
+updateEmployee = () => {
+  connection.query('SELECT first_name, last_name, id FROM employee', function(err, res) {
+    let employeeChoices = res.map(employee => ({name: employee.first_name + ' ' + employee.last_name, value: employee.id}));
+    if (err) throw err;
     inquirer
     .prompt([{
       type: 'list',
-      name: 'employees',
-      choices: employeeInfo
+      name: 'selectEmployee',
+      message: 'Select employee: ',
+      choices: employeeChoices
     },
     {
       type: 'input',
       name: 'newRole',
-      message: "What is the employee's new role? "
+      message: "Enter employee new role ID: ",
     }
     ]).then(function(res) {
-      connection.query('UPDATE employee SET role_ID = ? WHERE first_name = ?', [res.employees, res.newRole], function(err, res) {
+      connection.query(`UPDATE employee SET role_id = ${res.newRole} WHERE id = ${res.selectEmployee}`,  function(err, res) {
         if (err) throw err;
-        console.table(res);
         initPrompt();
       });
     });
