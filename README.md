@@ -40,15 +40,19 @@ and the application should begin prompting you with options regarding how to pro
 
 ## Usage
 Initial Prompt:
+
 ![](./Screenshots/initial.png)
 
 Adding Department:
+
 ![](./Screenshots/add-dept.png)
 
 Adding Role:
+
 ![](./Screenshots/add-role.png)
 
 Adding Employee:
+
 ![](./Screenshots/add-employee.png)
 * Currently application does not account for the addition of a new manager where the manager ID would be null.
 
