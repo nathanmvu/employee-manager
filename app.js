@@ -162,17 +162,29 @@ addEmployee = () => {
     },
     {
       type: 'list',
-      name: 'role_id',
+      name: 'role',
       message: 'Choose role ID: ',
-      choices: [1, 2, 3]
+      choices: getRoles()
     },
     {
-      type: 'input',
-      name: 'manager_id',
+      type: 'list',
+      name: 'manager',
       message: 'Enter manager ID: ',
+      choices: getManagers()
     }
   ]).then(function(res) {
-    let query = connection.query('INSERT INTO employee SET ?', res,
+    // Getting ID of role based on index in array
+    let roleID = getRoles().indexOf(res.role) + 1;
+    // Getting ID of manager based on index in array
+    let managerID = getManagers().indexOf(res.manager) + 1;
+    console.log(roleID);
+    let query = connection.query('INSERT INTO employee SET ?',
+    {
+      first_name: res.first_name,
+      last_name: res.last_name,
+      role_id: roleID,
+      manager_id: managerID
+    },
     function(err, res) {
       if (err) throw err;
       initPrompt();
