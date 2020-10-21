@@ -15,7 +15,7 @@ This program is a command line application to allow a user to have a database of
 ## Getting Started
 * [Github Repository](https://github.com/nathanmvu/employee-manager)
 * [Usage Demo Video](https://drive.google.com/file/d/1vFA2-EPDdR1uM6iebByQXihVDJTSqDrP/view)
-[Demo GIF](./Screenshots/demo.gif)
+![Demo GIF](./Screenshots/demo.gif)
 
 ## Installation
 This project uses Node.js so it will need to be installed in order to operate the application.
